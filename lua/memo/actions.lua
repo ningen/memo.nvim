@@ -1,6 +1,8 @@
 local M = {}
 
 local util = require("memo.util")
+local index = require("memo.index")
+local format = require("memo.format")
 
 local function current_memo_path(cfg)
 	local _, _, git_root = util.get_context()
@@ -282,6 +284,75 @@ function M.prune_blank(cfg)
 	local removed = #original - #pruned
 	vim.notify("Removed " .. removed .. " extra blank memo lines", vim.log.levels.INFO)
 	return removed
+end
+
+function M.index(cfg)
+	return open_markdown_scratch("memo-index.md", format.index_markdown(index.load(cfg)))
+end
+
+function M.timeline(cfg)
+	local loaded = index.load(cfg)
+	local groups = index.by_date(loaded.entries)
+	return open_markdown_scratch("memo-timeline.md", format.timeline_markdown(groups))
+end
+
+function M.filtered_export(cfg, args)
+	local filters = index.parse_filter_args(args)
+	local loaded = index.load(cfg)
+	local entries = index.filter(loaded.entries, filters)
+	return open_markdown_scratch("memo-filtered-export.md", format.entries_markdown(entries, {
+		title = "# Memo Filtered Export",
+		include_source = true,
+	}))
+end
+
+function M.jsonl_export(cfg, args)
+	local filters = index.parse_filter_args(args)
+	local loaded = index.load(cfg)
+	local entries = index.filter(loaded.entries, filters)
+	local lines = format.entries_jsonl(entries)
+	local b = vim.api.nvim_create_buf(false, true)
+	vim.api.nvim_buf_set_name(b, "memo-export.jsonl")
+	vim.bo[b].buftype = "nofile"
+	vim.bo[b].bufhidden = "wipe"
+	vim.bo[b].swapfile = false
+	vim.bo[b].filetype = "json"
+	vim.api.nvim_buf_set_lines(b, 0, -1, false, lines)
+	vim.api.nvim_set_current_buf(b)
+	return b
+end
+
+function M.open_source_from_entry(entry)
+	if not entry or not entry.location or not entry.location.path then
+		vim.notify("Memo entry has no source location", vim.log.levels.WARN)
+		return false
+	end
+
+	local path = entry.location.path
+	if not path:match("^/") then
+		local cwd = vim.fn.getcwd()
+		path = cwd .. "/" .. path
+	end
+
+	if vim.fn.filereadable(path) == 0 then
+		vim.notify("Source file does not exist: " .. path, vim.log.levels.WARN)
+		return false
+	end
+
+	vim.cmd("edit " .. vim.fn.fnameescape(path))
+	if entry.location.line1 then
+		vim.api.nvim_win_set_cursor(0, { entry.location.line1, 0 })
+	end
+	return true
+end
+
+function M.open_source(cfg)
+	local loaded = index.load(cfg)
+	if #loaded.entries == 0 then
+		vim.notify("No memo entries found", vim.log.levels.WARN)
+		return false
+	end
+	return M.open_source_from_entry(loaded.entries[1])
 end
 
 return M

@@ -149,6 +149,38 @@ function M.setup(opts)
 	end, {
 		desc = "Remove excessive blank lines from memo",
 	})
+
+	vim.api.nvim_create_user_command("MemoIndex", function()
+		actions.index(config)
+	end, {
+		desc = "Open memo index overview",
+	})
+
+	vim.api.nvim_create_user_command("MemoTimeline", function()
+		actions.timeline(config)
+	end, {
+		desc = "Open memo timeline grouped by date",
+	})
+
+	vim.api.nvim_create_user_command("MemoExportFiltered", function(cmd_opts)
+		actions.filtered_export(config, cmd_opts.fargs)
+	end, {
+		nargs = "*",
+		desc = "Open filtered memo export",
+	})
+
+	vim.api.nvim_create_user_command("MemoExportJsonl", function(cmd_opts)
+		actions.jsonl_export(config, cmd_opts.fargs)
+	end, {
+		nargs = "*",
+		desc = "Open memo JSONL export",
+	})
+
+	vim.api.nvim_create_user_command("MemoOpenSource", function()
+		actions.open_source(config)
+	end, {
+		desc = "Open source file for the newest indexed memo entry",
+	})
 end
 
 return M

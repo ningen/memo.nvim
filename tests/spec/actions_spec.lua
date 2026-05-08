@@ -1,4 +1,6 @@
 local actions = require("memo.actions")
+local index = require("memo.index")
+local format = require("memo.format")
 
 describe("search", function()
 	local tmpfile
@@ -185,5 +187,52 @@ describe("prune_blank", function()
 
 		assert.equals(1, removed)
 		assert.equals(4, #lines)
+	end)
+end)
+
+describe("index and format actions", function()
+	local tmpfile
+
+	before_each(function()
+		tmpfile = vim.fn.tempname() .. ".md"
+		vim.fn.writefile({
+			"---",
+			"## 2026-05-09 10:00 | project | a.lua:2",
+			"memo: alpha #one",
+			"---",
+			"## 2026-05-10 11:00 | project | b.lua:3",
+			"memo: beta #two",
+		}, tmpfile)
+	end)
+
+	after_each(function()
+		vim.fn.delete(tmpfile)
+	end)
+
+	it("loads indexed entries from configured memo paths", function()
+		local loaded = index.load({ path = tmpfile, per_project = false })
+
+		assert.equals(2, #loaded.entries)
+		assert.equals(tmpfile, loaded.entries[1].memo_path)
+		assert.equals("2026-05-10", loaded.entries[1].date)
+	end)
+
+	it("filters indexed entries by query and tag", function()
+		local loaded = index.load({ path = tmpfile, per_project = false })
+		local by_query = index.filter(loaded.entries, { query = "alpha" })
+		local by_tag = index.filter(loaded.entries, { tag = "two" })
+
+		assert.equals(1, #by_query)
+		assert.equals("2026-05-09", by_query[1].date)
+		assert.equals(1, #by_tag)
+		assert.equals("2026-05-10", by_tag[1].date)
+	end)
+
+	it("formats entries as jsonl", function()
+		local loaded = index.load({ path = tmpfile, per_project = false })
+		local lines = format.entries_jsonl(loaded.entries)
+
+		assert.equals(2, #lines)
+		assert.truthy(lines[1]:match('"summary":"beta #two"'))
 	end)
 end)
