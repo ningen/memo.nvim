@@ -215,4 +215,53 @@ function M.tags(cfg)
 	return open_markdown_scratch("memo-tags.md", lines)
 end
 
+function M.stats_summary(cfg)
+	local memo_path = current_memo_path(cfg)
+	local lines = {}
+	if vim.fn.filereadable(memo_path) == 1 then
+		lines = vim.fn.readfile(memo_path)
+	end
+
+	local entries = 0
+	local tasks = 0
+	local tags = {}
+	for _, line in ipairs(lines) do
+		if line:match("^## %d%d%d%d%-%d%d%-%d%d") then
+			entries = entries + 1
+		end
+		if util.is_task_line(line) then
+			tasks = tasks + 1
+		end
+		for _, tag in ipairs(util.extract_tags(line)) do
+			tags[tag] = true
+		end
+	end
+
+	local tag_count = 0
+	for _ in pairs(tags) do
+		tag_count = tag_count + 1
+	end
+
+	return {
+		path = memo_path,
+		lines = #lines,
+		entries = entries,
+		tasks = tasks,
+		tags = tag_count,
+	}
+end
+
+function M.stats(cfg)
+	local stats = M.stats_summary(cfg)
+	return open_markdown_scratch("memo-stats.md", {
+		"# Memo Stats",
+		"",
+		"- Memo path: " .. stats.path,
+		"- Lines: " .. stats.lines,
+		"- Entries: " .. stats.entries,
+		"- Task lines: " .. stats.tasks,
+		"- Unique tags: " .. stats.tags,
+	})
+end
+
 return M

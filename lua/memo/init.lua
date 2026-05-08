@@ -126,6 +126,12 @@ function M.setup(opts)
 	end, {
 		desc = "Open memo tag summary",
 	})
+
+	vim.api.nvim_create_user_command("MemoStats", function()
+		actions.stats(config)
+	end, {
+		desc = "Open memo statistics",
+	})
 end
 
 return M

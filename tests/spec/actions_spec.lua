@@ -136,3 +136,33 @@ describe("tag_summary", function()
 		assert.equals(1, counts.bug)
 	end)
 end)
+
+describe("stats_summary", function()
+	local tmpfile
+
+	before_each(function()
+		tmpfile = vim.fn.tempname() .. ".md"
+		vim.fn.writefile({
+			"---",
+			"## 2026-05-09 10:00 | project | a.lua",
+			"memo #idea",
+			"TODO: task",
+			"---",
+			"## 2026-05-09 11:00 | project | b.lua",
+			"memo #bug #idea",
+		}, tmpfile)
+	end)
+
+	after_each(function()
+		vim.fn.delete(tmpfile)
+	end)
+
+	it("counts memo size and indexed signals", function()
+		local stats = actions.stats_summary({ path = tmpfile, per_project = false })
+
+		assert.equals(7, stats.lines)
+		assert.equals(2, stats.entries)
+		assert.equals(1, stats.tasks)
+		assert.equals(2, stats.tags)
+	end)
+end)
