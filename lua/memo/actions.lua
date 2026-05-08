@@ -96,4 +96,19 @@ function M.export(cfg)
 	return open_markdown_scratch("memo-export.md", lines)
 end
 
+function M.yank_last(cfg)
+	local memo_path = current_memo_path(cfg)
+	if vim.fn.filereadable(memo_path) == 0 then
+		vim.notify("Memo file does not exist: " .. memo_path, vim.log.levels.WARN)
+		return {}
+	end
+
+	local lines = util.extract_last_entry(vim.fn.readfile(memo_path))
+	local text = table.concat(lines, "\n")
+	vim.fn.setreg('"', text)
+	vim.fn.setreg("+", text)
+	vim.notify("Yanked last memo entry", vim.log.levels.INFO)
+	return lines
+end
+
 return M

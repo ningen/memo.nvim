@@ -69,4 +69,28 @@ function M.make_capture(location, project, note, lines, filetype)
 	return capture
 end
 
+function M.extract_last_entry(lines)
+	local start = nil
+
+	for i = #lines, 1, -1 do
+		if lines[i] == "---" then
+			start = i
+			if i > 1 and lines[i - 1] == "" then
+				start = i - 1
+			end
+			break
+		end
+	end
+
+	if not start then
+		return lines
+	end
+
+	local entry = {}
+	for i = start, #lines do
+		table.insert(entry, lines[i])
+	end
+	return entry
+end
+
 return M

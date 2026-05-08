@@ -88,6 +88,12 @@ function M.setup(opts)
 	end, {
 		desc = "Open an LLM-friendly memo export buffer",
 	})
+
+	vim.api.nvim_create_user_command("MemoYankLast", function()
+		actions.yank_last(config)
+	end, {
+		desc = "Yank the last memo entry",
+	})
 end
 
 return M

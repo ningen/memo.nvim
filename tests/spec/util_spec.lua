@@ -84,6 +84,32 @@ describe("make_capture", function()
 	end)
 end)
 
+describe("extract_last_entry", function()
+	it("returns the last separator-delimited entry", function()
+		local entry = util.extract_last_entry({
+			"",
+			"---",
+			"## first",
+			"",
+			"",
+			"---",
+			"## second",
+			"memo: keep",
+		})
+
+		assert.equals("", entry[1])
+		assert.equals("---", entry[2])
+		assert.equals("## second", entry[3])
+		assert.equals("memo: keep", entry[4])
+	end)
+
+	it("returns all lines when no separator exists", function()
+		local entry = util.extract_last_entry({ "one", "two" })
+		assert.equals("one", entry[1])
+		assert.equals("two", entry[2])
+	end)
+end)
+
 describe("resolve_memo_path", function()
 	it("returns configured path when per_project is false", function()
 		local path = util.resolve_memo_path("/repo", { per_project = false, path = "/tmp/memo.md" })
