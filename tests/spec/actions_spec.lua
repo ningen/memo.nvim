@@ -166,3 +166,24 @@ describe("stats_summary", function()
 		assert.equals(2, stats.tags)
 	end)
 end)
+
+describe("prune_blank", function()
+	local tmpfile
+
+	before_each(function()
+		tmpfile = vim.fn.tempname() .. ".md"
+		vim.fn.writefile({ "a", "", "", "", "b" }, tmpfile)
+	end)
+
+	after_each(function()
+		vim.fn.delete(tmpfile)
+	end)
+
+	it("writes memo file with excessive blank lines removed", function()
+		local removed = actions.prune_blank({ path = tmpfile, per_project = false })
+		local lines = vim.fn.readfile(tmpfile)
+
+		assert.equals(1, removed)
+		assert.equals(4, #lines)
+	end)
+end)

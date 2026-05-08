@@ -107,4 +107,24 @@ function M.extract_tags(line)
 	return tags
 end
 
+function M.prune_blank_lines(lines, max_blank)
+	max_blank = max_blank or 2
+	local pruned = {}
+	local blank_count = 0
+
+	for _, line in ipairs(lines) do
+		if line == "" then
+			blank_count = blank_count + 1
+			if blank_count <= max_blank then
+				table.insert(pruned, line)
+			end
+		else
+			blank_count = 0
+			table.insert(pruned, line)
+		end
+	end
+
+	return pruned
+end
+
 return M

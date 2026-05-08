@@ -134,6 +134,18 @@ describe("extract_tags", function()
 	end)
 end)
 
+describe("prune_blank_lines", function()
+	it("keeps at most two consecutive blank lines by default", function()
+		local lines = util.prune_blank_lines({ "a", "", "", "", "b", "", "", "c" })
+
+		assert.equals(7, #lines)
+		assert.equals("a", lines[1])
+		assert.equals("", lines[2])
+		assert.equals("", lines[3])
+		assert.equals("b", lines[4])
+	end)
+end)
+
 describe("resolve_memo_path", function()
 	it("returns configured path when per_project is false", function()
 		local path = util.resolve_memo_path("/repo", { per_project = false, path = "/tmp/memo.md" })

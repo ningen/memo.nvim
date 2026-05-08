@@ -264,4 +264,24 @@ function M.stats(cfg)
 	})
 end
 
+function M.prune_blank(cfg)
+	local memo_path = current_memo_path(cfg)
+	if vim.fn.filereadable(memo_path) == 0 then
+		vim.notify("Memo file does not exist: " .. memo_path, vim.log.levels.WARN)
+		return 0
+	end
+
+	local original = vim.fn.readfile(memo_path)
+	local pruned = util.prune_blank_lines(original, 2)
+	if #pruned == #original then
+		vim.notify("Memo blank lines already look tidy", vim.log.levels.INFO)
+		return 0
+	end
+
+	vim.fn.writefile(pruned, memo_path)
+	local removed = #original - #pruned
+	vim.notify("Removed " .. removed .. " extra blank memo lines", vim.log.levels.INFO)
+	return removed
+end
+
 return M

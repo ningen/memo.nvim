@@ -132,6 +132,12 @@ function M.setup(opts)
 	end, {
 		desc = "Open memo statistics",
 	})
+
+	vim.api.nvim_create_user_command("MemoPruneBlank", function()
+		actions.prune_blank(config)
+	end, {
+		desc = "Remove excessive blank lines from memo",
+	})
 end
 
 return M
