@@ -82,6 +82,12 @@ function M.setup(opts)
 		nargs = "+",
 		desc = "Search memo and show matches in quickfix",
 	})
+
+	vim.api.nvim_create_user_command("MemoExport", function()
+		actions.export(config)
+	end, {
+		desc = "Open an LLM-friendly memo export buffer",
+	})
 end
 
 return M
