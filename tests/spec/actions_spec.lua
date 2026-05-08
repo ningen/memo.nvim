@@ -4,6 +4,10 @@ local format = require("memo.format")
 local prompt = require("memo.prompt")
 local archive = require("memo.archive")
 local health = require("memo.health")
+local query = require("memo.query")
+local tasks = require("memo.tasks")
+local journal = require("memo.journal")
+local templates = require("memo.templates")
 
 describe("search", function()
 	local tmpfile
@@ -288,5 +292,72 @@ describe("health", function()
 		assert.equals("# Memo Health", report[1])
 		assert.equals("- ok: fine", report[3])
 		assert.equals("- warn: careful", report[4])
+	end)
+end)
+
+describe("query", function()
+	it("parses and matches structured memo query syntax", function()
+		local parsed = query.parse("tag:bug after:2026-05-01 path:lua crash")
+		local entry = {
+			date = "2026-05-09",
+			location = { path = "lua/memo/init.lua" },
+			tags = { "bug" },
+			lines = { "memo: crash happens" },
+		}
+
+		assert.equals("bug", parsed.tags[1])
+		assert.truthy(query.matches(entry, parsed))
+		assert.equals("text=crash, tag=bug, after=2026-05-01, path=lua", query.describe(parsed))
+	end)
+end)
+
+describe("tasks", function()
+	it("collects checkboxes and TODO lines", function()
+		local found = tasks.collect({
+			"## 2026-05-09 10:00 | p | a.lua",
+			"- [ ] checkbox task",
+			"TODO: keyword task",
+		}, "/tmp/memo.md")
+
+		assert.equals(2, #found)
+		assert.equals("checkbox", found[1].kind)
+		assert.equals("todo", found[2].kind)
+	end)
+
+	it("toggles markdown checkbox lines", function()
+		local line, changed = tasks.toggle_line("- [ ] task")
+		assert.truthy(changed)
+		assert.equals("- [x] task", line)
+	end)
+end)
+
+describe("journal", function()
+	it("builds a standup draft from entries", function()
+		local lines = journal.standup({
+			{
+				date = os.date("%Y-%m-%d"),
+				time = "10:00",
+				project = "p",
+				location = { text = "a.lua" },
+				lines = { "memo: TODO finish" },
+				summary = "TODO finish",
+			},
+		}, os.date("%Y-%m-%d"))
+		local text = table.concat(lines, "\n")
+
+		assert.truthy(text:match("Standup From Memo"))
+		assert.truthy(text:match("TODO finish"))
+	end)
+end)
+
+describe("templates", function()
+	it("renders capture templates with variables", function()
+		local rendered = templates.render("bug", {
+			note = "nil crash",
+			location = "a.lua:1",
+		})
+
+		assert.equals("bug: nil crash", rendered[1])
+		assert.equals("- source: a.lua:1", rendered[5])
 	end)
 end)

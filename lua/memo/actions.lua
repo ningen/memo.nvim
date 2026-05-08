@@ -7,6 +7,10 @@ local prompt = require("memo.prompt")
 local links = require("memo.links")
 local archive = require("memo.archive")
 local health = require("memo.health")
+local query = require("memo.query")
+local tasks = require("memo.tasks")
+local journal = require("memo.journal")
+local templates = require("memo.templates")
 
 local function current_memo_path(cfg)
 	local _, _, git_root = util.get_context()
@@ -412,6 +416,42 @@ function M.archive_before(cfg, date)
 		vim.notify("Archived " .. result.archived .. " memo entries to " .. result.archive_path, vim.log.levels.INFO)
 	end
 	return result
+end
+
+function M.query(cfg, args)
+	local input = table.concat(args or {}, " ")
+	local loaded = index.load(cfg)
+	local entries = query.filter(loaded.entries, input)
+	local parsed = query.parse(input)
+	return open_markdown_scratch("memo-query.md", format.entries_markdown(entries, {
+		title = "# Memo Query: " .. query.describe(parsed),
+		include_source = true,
+	}))
+end
+
+function M.task_report(cfg)
+	local loaded = index.load(cfg)
+	local all = {}
+	for _, file in ipairs(index.memo_paths(cfg)) do
+		if vim.fn.filereadable(file.path) == 1 then
+			vim.list_extend(all, tasks.collect(vim.fn.readfile(file.path), file.path))
+		end
+	end
+	return open_markdown_scratch("memo-tasks.md", tasks.markdown(all))
+end
+
+function M.digest(cfg)
+	local loaded = index.load(cfg)
+	return open_markdown_scratch("memo-digest.md", journal.digest(loaded.entries))
+end
+
+function M.standup(cfg)
+	local loaded = index.load(cfg)
+	return open_markdown_scratch("memo-standup.md", journal.standup(loaded.entries, os.date("%Y-%m-%d")))
+end
+
+function M.templates(cfg)
+	return open_markdown_scratch("memo-templates.md", templates.markdown(cfg.templates))
 end
 
 return M

@@ -35,6 +35,7 @@ function M.setup(opts)
 			note_label = "memo",
 			include_code = true,
 		},
+		templates = {},
 	}, opts)
 	config.path = vim.fn.expand(config.path)
 
@@ -212,6 +213,37 @@ function M.setup(opts)
 	end, {
 		nargs = 1,
 		desc = "Archive memo entries before YYYY-MM-DD",
+	})
+
+	vim.api.nvim_create_user_command("MemoQuery", function(cmd_opts)
+		actions.query(config, cmd_opts.fargs)
+	end, {
+		nargs = "*",
+		desc = "Query indexed memo entries",
+	})
+
+	vim.api.nvim_create_user_command("MemoTaskReport", function()
+		actions.task_report(config)
+	end, {
+		desc = "Open memo task report",
+	})
+
+	vim.api.nvim_create_user_command("MemoDigest", function()
+		actions.digest(config)
+	end, {
+		desc = "Open memo digest",
+	})
+
+	vim.api.nvim_create_user_command("MemoStandup", function()
+		actions.standup(config)
+	end, {
+		desc = "Open standup draft from today's memo",
+	})
+
+	vim.api.nvim_create_user_command("MemoTemplates", function()
+		actions.templates(config)
+	end, {
+		desc = "Open available memo capture templates",
 	})
 end
 
