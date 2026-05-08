@@ -3,6 +3,10 @@ local M = {}
 local util = require("memo.util")
 local index = require("memo.index")
 local format = require("memo.format")
+local prompt = require("memo.prompt")
+local links = require("memo.links")
+local archive = require("memo.archive")
+local health = require("memo.health")
 
 local function current_memo_path(cfg)
 	local _, _, git_root = util.get_context()
@@ -353,6 +357,61 @@ function M.open_source(cfg)
 		return false
 	end
 	return M.open_source_from_entry(loaded.entries[1])
+end
+
+function M.prompt(cfg, args)
+	local opts = prompt.parse_args(args)
+	local lines = prompt.build_from_index(cfg, opts.prompt_kind or "summary", opts)
+	return open_markdown_scratch("memo-prompt.md", lines)
+end
+
+function M.sources(cfg)
+	return links.quickfix(cfg)
+end
+
+function M.broken_sources(cfg)
+	local broken = links.broken_report(cfg)
+	local items = {}
+	for _, entry in ipairs(broken) do
+		table.insert(items, {
+			filename = entry.memo_path,
+			lnum = entry.header_lnum or entry.start_lnum or 1,
+			col = 1,
+			text = entry.location and entry.location.text or "broken source",
+		})
+	end
+
+	vim.fn.setqflist({}, " ", {
+		title = "Memo Broken Sources",
+		items = items,
+	})
+	if #items > 0 then
+		vim.cmd("copen")
+	else
+		vim.notify("No broken memo source references", vim.log.levels.INFO)
+	end
+	return items
+end
+
+function M.health(cfg)
+	return open_markdown_scratch("memo-health.md", health.to_markdown(health.check(cfg)))
+end
+
+function M.archive_before(cfg, date)
+	if not date or date == "" then
+		vim.notify("MemoArchiveBefore requires YYYY-MM-DD", vim.log.levels.WARN)
+		return nil
+	end
+	local memo_path = current_memo_path(cfg)
+	local result = archive.archive_file(memo_path, date)
+	if result.error then
+		vim.notify(result.error .. ": " .. memo_path, vim.log.levels.WARN)
+	elseif result.archived == 0 then
+		vim.notify("No memo entries before " .. date, vim.log.levels.INFO)
+	else
+		vim.notify("Archived " .. result.archived .. " memo entries to " .. result.archive_path, vim.log.levels.INFO)
+	end
+	return result
 end
 
 return M

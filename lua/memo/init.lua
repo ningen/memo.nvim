@@ -181,6 +181,38 @@ function M.setup(opts)
 	end, {
 		desc = "Open source file for the newest indexed memo entry",
 	})
+
+	vim.api.nvim_create_user_command("MemoPrompt", function(cmd_opts)
+		actions.prompt(config, cmd_opts.fargs)
+	end, {
+		nargs = "*",
+		desc = "Open an LLM prompt built from memo entries",
+	})
+
+	vim.api.nvim_create_user_command("MemoSources", function()
+		actions.sources(config)
+	end, {
+		desc = "List readable memo source references in quickfix",
+	})
+
+	vim.api.nvim_create_user_command("MemoBrokenSources", function()
+		actions.broken_sources(config)
+	end, {
+		desc = "List broken memo source references in quickfix",
+	})
+
+	vim.api.nvim_create_user_command("MemoHealth", function()
+		actions.health(config)
+	end, {
+		desc = "Open memo health report",
+	})
+
+	vim.api.nvim_create_user_command("MemoArchiveBefore", function(cmd_opts)
+		actions.archive_before(config, cmd_opts.args)
+	end, {
+		nargs = 1,
+		desc = "Archive memo entries before YYYY-MM-DD",
+	})
 end
 
 return M

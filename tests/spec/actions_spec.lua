@@ -1,6 +1,9 @@
 local actions = require("memo.actions")
 local index = require("memo.index")
 local format = require("memo.format")
+local prompt = require("memo.prompt")
+local archive = require("memo.archive")
+local health = require("memo.health")
 
 describe("search", function()
 	local tmpfile
@@ -234,5 +237,56 @@ describe("index and format actions", function()
 
 		assert.equals(2, #lines)
 		assert.truthy(lines[1]:match('"summary":"beta #two"'))
+	end)
+end)
+
+describe("prompt", function()
+	it("builds purpose-specific prompt text", function()
+		local lines = prompt.build("debug", {
+			{
+				date = "2026-05-09",
+				time = "10:00",
+				project = "p",
+				location = { text = "a.lua:1" },
+				lines = { "memo: nil crash #bug" },
+				tags = { "bug" },
+				summary = "nil crash #bug",
+			},
+		})
+		local text = table.concat(lines, "\n")
+
+		assert.truthy(text:match("Memo Debug Prompt"))
+		assert.truthy(text:match("debugging hypotheses"))
+		assert.truthy(text:match("nil crash"))
+	end)
+end)
+
+describe("archive", function()
+	it("plans entries before the requested date", function()
+		local planned = archive.plan({
+			"---",
+			"## 2026-05-08 10:00 | p | a.lua",
+			"old",
+			"---",
+			"## 2026-05-09 10:00 | p | b.lua",
+			"new",
+		}, "2026-05-09")
+
+		assert.equals(1, planned.archived)
+		assert.equals("old", planned.archive_lines[3])
+		assert.equals("new", planned.keep_lines[3])
+	end)
+end)
+
+describe("health", function()
+	it("returns a markdown health report", function()
+		local report = health.to_markdown({
+			{ level = "ok", message = "fine" },
+			{ level = "warn", message = "careful" },
+		})
+
+		assert.equals("# Memo Health", report[1])
+		assert.equals("- ok: fine", report[3])
+		assert.equals("- warn: careful", report[4])
 	end)
 end)
