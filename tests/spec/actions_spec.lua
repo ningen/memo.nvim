@@ -8,6 +8,9 @@ local query = require("memo.query")
 local tasks = require("memo.tasks")
 local journal = require("memo.journal")
 local templates = require("memo.templates")
+local collections = require("memo.collections")
+local insights = require("memo.insights")
+local review = require("memo.review")
 
 describe("search", function()
 	local tmpfile
@@ -359,5 +362,61 @@ describe("templates", function()
 
 		assert.equals("bug: nil crash", rendered[1])
 		assert.equals("- source: a.lua:1", rendered[5])
+	end)
+end)
+
+describe("collections", function()
+	it("runs a named collection as a saved query", function()
+		local tmpfile = vim.fn.tempname() .. ".md"
+		vim.fn.writefile({
+			"## 2026-05-09 10:00 | p | a.lua",
+			"memo: broken #bug",
+		}, tmpfile)
+
+		local result = collections.run("bugs", { path = tmpfile, per_project = false })
+		vim.fn.delete(tmpfile)
+
+		assert.equals("bugs", result.name)
+		assert.equals(1, #result.entries)
+	end)
+end)
+
+describe("insights", function()
+	it("analyzes entry signals and recommendations", function()
+		local analysis = insights.analyze({
+			{
+				project = "p",
+				date = "2026-05-09",
+				location = { path = "a.lua" },
+				tags = { "bug", "risk" },
+				lines = { "TODO: fix" },
+				code_blocks = { { language = "lua", lines = {} } },
+			},
+		})
+
+		assert.equals(1, analysis.entry_count)
+		assert.equals(1, analysis.task_count)
+		assert.equals("bug+risk", analysis.tag_pairs[1].key)
+		assert.truthy(table.concat(insights.recommendations(analysis), "\n"):match("Memo"))
+	end)
+end)
+
+describe("review", function()
+	it("builds a review pack from memo entries", function()
+		local lines = review.pack({
+			{
+				date = "2026-05-09",
+				time = "10:00",
+				project = "p",
+				location = { text = "a.lua", path = "a.lua" },
+				tags = { "bug" },
+				lines = { "memo: bug #bug" },
+				summary = "bug #bug",
+			},
+		})
+
+		local text = table.concat(lines, "\n")
+		assert.truthy(text:match("Memo Review Pack"))
+		assert.truthy(text:match("Bug%-tagged entries: 1"))
 	end)
 end)

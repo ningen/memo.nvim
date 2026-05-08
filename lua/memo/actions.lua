@@ -11,6 +11,9 @@ local query = require("memo.query")
 local tasks = require("memo.tasks")
 local journal = require("memo.journal")
 local templates = require("memo.templates")
+local collections = require("memo.collections")
+local insights = require("memo.insights")
+local review = require("memo.review")
 
 local function current_memo_path(cfg)
 	local _, _, git_root = util.get_context()
@@ -452,6 +455,36 @@ end
 
 function M.templates(cfg)
 	return open_markdown_scratch("memo-templates.md", templates.markdown(cfg.templates))
+end
+
+function M.collections(cfg)
+	return open_markdown_scratch("memo-collections.md", collections.list_markdown(cfg))
+end
+
+function M.collection(cfg, name)
+	if not name or name == "" then
+		vim.notify("MemoCollection requires a collection name", vim.log.levels.WARN)
+		return nil
+	end
+	return open_markdown_scratch("memo-collection-" .. name .. ".md", collections.markdown(collections.run(name, cfg)))
+end
+
+function M.insights(cfg)
+	local loaded = index.load(cfg)
+	return open_markdown_scratch("memo-insights.md", insights.markdown(insights.analyze(loaded.entries)))
+end
+
+function M.recommendations(cfg)
+	local loaded = index.load(cfg)
+	return open_markdown_scratch("memo-recommendations.md", insights.recommendations(insights.analyze(loaded.entries)))
+end
+
+function M.review_pack(cfg, args)
+	local loaded = index.load(cfg)
+	local opts = {
+		query = table.concat(args or {}, " "),
+	}
+	return open_markdown_scratch("memo-review-pack.md", review.pack(loaded.entries, opts))
 end
 
 return M

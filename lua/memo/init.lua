@@ -36,6 +36,7 @@ function M.setup(opts)
 			include_code = true,
 		},
 		templates = {},
+		collections = {},
 	}, opts)
 	config.path = vim.fn.expand(config.path)
 
@@ -244,6 +245,38 @@ function M.setup(opts)
 		actions.templates(config)
 	end, {
 		desc = "Open available memo capture templates",
+	})
+
+	vim.api.nvim_create_user_command("MemoCollections", function()
+		actions.collections(config)
+	end, {
+		desc = "Open memo collection list",
+	})
+
+	vim.api.nvim_create_user_command("MemoCollection", function(cmd_opts)
+		actions.collection(config, cmd_opts.args)
+	end, {
+		nargs = 1,
+		desc = "Open a named memo collection",
+	})
+
+	vim.api.nvim_create_user_command("MemoInsights", function()
+		actions.insights(config)
+	end, {
+		desc = "Open memo insight report",
+	})
+
+	vim.api.nvim_create_user_command("MemoRecommendations", function()
+		actions.recommendations(config)
+	end, {
+		desc = "Open memo workflow recommendations",
+	})
+
+	vim.api.nvim_create_user_command("MemoReviewPack", function(cmd_opts)
+		actions.review_pack(config, cmd_opts.fargs)
+	end, {
+		nargs = "*",
+		desc = "Open review pack from memo evidence",
 	})
 end
 
