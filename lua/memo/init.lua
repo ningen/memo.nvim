@@ -30,6 +30,10 @@ function M.setup(opts)
 			number = false,
 			relativenumber = false,
 		},
+		capture = {
+			note_label = "memo",
+			include_code = true,
+		},
 	}, opts)
 	config.path = vim.fn.expand(config.path)
 

@@ -108,7 +108,7 @@ local function append_capture(note, range_lines, filetype, cfg, range, context)
 	local memo_path = util.resolve_memo_path(git_root, cfg)
 	local b = buffer.get_or_create(memo_path)
 	local location = range and util.make_location(range.filepath, git_root, range.line1, range.line2) or filename
-	local lines = util.make_capture(location, project, note, range_lines, filetype)
+	local lines = util.make_capture(location, project, note, range_lines, filetype, cfg.capture)
 
 	buffer.append_lines(b, lines)
 	vim.api.nvim_buf_call(b, function()

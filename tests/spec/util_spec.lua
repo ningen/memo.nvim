@@ -82,6 +82,20 @@ describe("make_capture", function()
 		assert.equals("```lua", capture[5])
 		assert.equals("local x = 1", capture[6])
 	end)
+
+	it("allows custom note labels", function()
+		local capture = util.make_capture("lua/memo/init.lua:1", "memo.nvim", "check this", {}, "lua", {
+			note_label = "note",
+		})
+		assert.equals("note: check this", capture[5])
+	end)
+
+	it("can omit source code", function()
+		local capture = util.make_capture("lua/memo/init.lua:1", "memo.nvim", "check this", { "local x = 1" }, "lua", {
+			include_code = false,
+		})
+		assert.equals(nil, capture[7])
+	end)
 end)
 
 describe("extract_last_entry", function()

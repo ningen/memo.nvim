@@ -38,6 +38,10 @@ require("memo").setup({
     number = false,
     relativenumber = false,
   },
+  capture = {
+    note_label = "memo",
+    include_code = true,
+  },
 })
 ```
 
