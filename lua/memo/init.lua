@@ -296,6 +296,12 @@ function M.setup(opts)
 	end, {
 		desc = "Open duplicate memo candidate report",
 	})
+
+	vim.api.nvim_create_user_command("MemoValidateConfig", function()
+		actions.validate(config)
+	end, {
+		desc = "Open memo configuration validation report",
+	})
 end
 
 return M

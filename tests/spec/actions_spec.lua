@@ -14,6 +14,7 @@ local review = require("memo.review")
 local dedupe = require("memo.dedupe")
 local git_context = require("memo.git_context")
 local completion = require("memo.completion")
+local validate = require("memo.validate")
 
 describe("search", function()
 	local tmpfile
@@ -476,5 +477,32 @@ describe("completion", function()
 		local args = completion.query_args(nil, "MemoQuery ta")
 
 		assert.equals("tag:", args[1])
+	end)
+end)
+
+describe("validate", function()
+	it("reports valid configuration", function()
+		local report = validate.config({
+			path = "~/memo.md",
+			per_project = false,
+			window = { width = 0.6, height = 0.4, border = "rounded" },
+			input_window = { width = 0.4, min_width = 30, max_width = 80 },
+			capture = { note_label = "memo", include_code = true },
+			templates = {},
+			collections = {},
+		})
+
+		assert.equals("ok", report[1].level)
+	end)
+
+	it("warns for invalid collection query", function()
+		local report = validate.config({
+			collections = {
+				bad = {},
+			},
+		})
+
+		local text = table.concat(validate.markdown(report), "\n")
+		assert.truthy(text:match("collections.bad.query"))
 	end)
 end)
