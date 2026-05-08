@@ -55,4 +55,18 @@ function M.make_code_block(lines, filetype)
 	return block
 end
 
+function M.make_capture(location, project, note, lines, filetype)
+	local capture = M.make_header(location, project)
+
+	if note and note ~= "" then
+		vim.list_extend(capture, { "memo: " .. note, "" })
+	end
+
+	if lines and #lines > 0 then
+		vim.list_extend(capture, M.make_code_block(lines, filetype))
+	end
+
+	return capture
+end
+
 return M

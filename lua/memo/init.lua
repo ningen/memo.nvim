@@ -6,10 +6,31 @@ local config = {}
 
 function M.setup(opts)
 	opts = opts or {}
-	config = {
-		path = vim.fn.expand(opts.path or "~/memo.md"),
+	config = vim.tbl_deep_extend("force", {
+		path = "~/memo.md",
 		per_project = opts.per_project or false,
-	}
+		window = {
+			width = 0.6,
+			height = 0.4,
+			border = "rounded",
+			title_pos = "center",
+			winblend = 20,
+			number = false,
+			relativenumber = false,
+		},
+		input_window = {
+			width = 0.4,
+			min_width = 30,
+			max_width = 80,
+			border = "rounded",
+			title = " memo ",
+			title_pos = "center",
+			winblend = 10,
+			number = false,
+			relativenumber = false,
+		},
+	}, opts)
+	config.path = vim.fn.expand(config.path)
 
 	vim.api.nvim_create_user_command("Memo", function(cmd_opts)
 		local range_lines = nil
@@ -30,6 +51,28 @@ function M.setup(opts)
 	end, {
 		range = true,
 		desc = "Toggle memo window",
+	})
+
+	vim.api.nvim_create_user_command("MemoHere", function(cmd_opts)
+		local line1 = cmd_opts.line1
+		local line2 = cmd_opts.line2
+
+		if cmd_opts.range == 0 then
+			line1 = vim.api.nvim_win_get_cursor(0)[1]
+			line2 = line1
+		end
+
+		local range_lines = vim.api.nvim_buf_get_lines(0, line1 - 1, line2, false)
+		local range = {
+			line1 = line1,
+			line2 = line2,
+			filepath = vim.fn.expand("%:p"),
+		}
+
+		window.capture_here(range_lines, vim.bo.filetype, config, range)
+	end, {
+		range = true,
+		desc = "Capture quick memo at current location",
 	})
 end
 
