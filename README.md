@@ -64,6 +64,25 @@ require("memo").setup({
 | `:MemoTags` | タグ一覧を Markdown バッファで開く |
 | `:MemoStats` | メモ統計を Markdown バッファで開く |
 | `:MemoPruneBlank` | 余分な連続空行を整理する |
+| `:MemoTelescope` | Telescope でメモエントリを検索・プレビューする |
+| `:MemoIndex` | 構造化されたメモ概要を開く |
+| `:MemoTimeline` | 日付別タイムラインを開く |
+| `:MemoExportFiltered` | 条件付きで LLM 向けメモを書き出す |
+| `:MemoExportJsonl` | JSONL 形式でメモを書き出す |
+| `:MemoPrompt` | 目的別 LLM プロンプトを開く |
+| `:MemoQuery` | 軽量 query syntax でメモを抽出する |
+| `:MemoTaskReport` | タスクレポートを開く |
+| `:MemoDigest` | メモ digest を開く |
+| `:MemoStandup` | 今日の standup 下書きを開く |
+| `:MemoCollections` | 保存済み collection 一覧を開く |
+| `:MemoCollection` | 保存済み collection を開く |
+| `:MemoInsights` | メモの利用傾向を開く |
+| `:MemoRecommendations` | メモ運用のおすすめを開く |
+| `:MemoReviewPack` | レビュー用メモパックを開く |
+| `:MemoWorktreePrompt` | git 状態込みの LLM プロンプトを開く |
+| `:MemoDuplicates` | 重複候補を開く |
+| `:MemoValidateConfig` | 設定検証レポートを開く |
+| `:MemoVersion` | バージョン情報を開く |
 
 ### ビジュアル選択 → コードブロック
 
@@ -92,3 +111,8 @@ vim.keymap.set("v", "<leader>mh", ":MemoHere<CR>")
 ```
 .memo.md
 ```
+
+## 詳細ドキュメント
+
+機能ごとの目的・意図・使い方は `docs/` 配下にあります。
+全体構成は `docs/architecture.md` を参照してください。

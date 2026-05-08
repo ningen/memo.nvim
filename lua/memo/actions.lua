@@ -1,6 +1,7 @@
 local M = {}
 
 local util = require("memo.util")
+local scratch = require("memo.scratch")
 local index = require("memo.index")
 local format = require("memo.format")
 local prompt = require("memo.prompt")
@@ -22,18 +23,6 @@ local version = require("memo.version")
 local function current_memo_path(cfg)
 	local _, _, git_root = util.get_context()
 	return util.resolve_memo_path(git_root, cfg)
-end
-
-local function open_markdown_scratch(name, lines)
-	local b = vim.api.nvim_create_buf(false, true)
-	vim.api.nvim_buf_set_name(b, name)
-	vim.bo[b].buftype = "nofile"
-	vim.bo[b].bufhidden = "wipe"
-	vim.bo[b].swapfile = false
-	vim.bo[b].filetype = "markdown"
-	vim.api.nvim_buf_set_lines(b, 0, -1, false, lines)
-	vim.api.nvim_set_current_buf(b)
-	return b
 end
 
 function M.search(query, cfg)
@@ -110,7 +99,7 @@ end
 
 function M.export(cfg)
 	local lines = M.export_lines(cfg)
-	return open_markdown_scratch("memo-export.md", lines)
+	return scratch.markdown("memo-export.md", lines)
 end
 
 function M.yank_last(cfg)
@@ -229,7 +218,7 @@ function M.tags(cfg)
 		end
 	end
 
-	return open_markdown_scratch("memo-tags.md", lines)
+	return scratch.markdown("memo-tags.md", lines)
 end
 
 function M.stats_summary(cfg)
@@ -270,7 +259,7 @@ end
 
 function M.stats(cfg)
 	local stats = M.stats_summary(cfg)
-	return open_markdown_scratch("memo-stats.md", {
+	return scratch.markdown("memo-stats.md", {
 		"# Memo Stats",
 		"",
 		"- Memo path: " .. stats.path,
@@ -302,20 +291,20 @@ function M.prune_blank(cfg)
 end
 
 function M.index(cfg)
-	return open_markdown_scratch("memo-index.md", format.index_markdown(index.load(cfg)))
+	return scratch.markdown("memo-index.md", format.index_markdown(index.load(cfg)))
 end
 
 function M.timeline(cfg)
 	local loaded = index.load(cfg)
 	local groups = index.by_date(loaded.entries)
-	return open_markdown_scratch("memo-timeline.md", format.timeline_markdown(groups))
+	return scratch.markdown("memo-timeline.md", format.timeline_markdown(groups))
 end
 
 function M.filtered_export(cfg, args)
 	local filters = index.parse_filter_args(args)
 	local loaded = index.load(cfg)
 	local entries = index.filter(loaded.entries, filters)
-	return open_markdown_scratch("memo-filtered-export.md", format.entries_markdown(entries, {
+	return scratch.markdown("memo-filtered-export.md", format.entries_markdown(entries, {
 		title = "# Memo Filtered Export",
 		include_source = true,
 	}))
@@ -326,15 +315,7 @@ function M.jsonl_export(cfg, args)
 	local loaded = index.load(cfg)
 	local entries = index.filter(loaded.entries, filters)
 	local lines = format.entries_jsonl(entries)
-	local b = vim.api.nvim_create_buf(false, true)
-	vim.api.nvim_buf_set_name(b, "memo-export.jsonl")
-	vim.bo[b].buftype = "nofile"
-	vim.bo[b].bufhidden = "wipe"
-	vim.bo[b].swapfile = false
-	vim.bo[b].filetype = "json"
-	vim.api.nvim_buf_set_lines(b, 0, -1, false, lines)
-	vim.api.nvim_set_current_buf(b)
-	return b
+	return scratch.jsonl("memo-export.jsonl", lines)
 end
 
 function M.open_source_from_entry(entry)
@@ -373,7 +354,7 @@ end
 function M.prompt(cfg, args)
 	local opts = prompt.parse_args(args)
 	local lines = prompt.build_from_index(cfg, opts.prompt_kind or "summary", opts)
-	return open_markdown_scratch("memo-prompt.md", lines)
+	return scratch.markdown("memo-prompt.md", lines)
 end
 
 function M.sources(cfg)
@@ -405,7 +386,7 @@ function M.broken_sources(cfg)
 end
 
 function M.health(cfg)
-	return open_markdown_scratch("memo-health.md", health.to_markdown(health.check(cfg)))
+	return scratch.markdown("memo-health.md", health.to_markdown(health.check(cfg)))
 end
 
 function M.archive_before(cfg, date)
@@ -430,7 +411,7 @@ function M.query(cfg, args)
 	local loaded = index.load(cfg)
 	local entries = query.filter(loaded.entries, input)
 	local parsed = query.parse(input)
-	return open_markdown_scratch("memo-query.md", format.entries_markdown(entries, {
+	return scratch.markdown("memo-query.md", format.entries_markdown(entries, {
 		title = "# Memo Query: " .. query.describe(parsed),
 		include_source = true,
 	}))
@@ -444,25 +425,25 @@ function M.task_report(cfg)
 			vim.list_extend(all, tasks.collect(vim.fn.readfile(file.path), file.path))
 		end
 	end
-	return open_markdown_scratch("memo-tasks.md", tasks.markdown(all))
+	return scratch.markdown("memo-tasks.md", tasks.markdown(all))
 end
 
 function M.digest(cfg)
 	local loaded = index.load(cfg)
-	return open_markdown_scratch("memo-digest.md", journal.digest(loaded.entries))
+	return scratch.markdown("memo-digest.md", journal.digest(loaded.entries))
 end
 
 function M.standup(cfg)
 	local loaded = index.load(cfg)
-	return open_markdown_scratch("memo-standup.md", journal.standup(loaded.entries, os.date("%Y-%m-%d")))
+	return scratch.markdown("memo-standup.md", journal.standup(loaded.entries, os.date("%Y-%m-%d")))
 end
 
 function M.templates(cfg)
-	return open_markdown_scratch("memo-templates.md", templates.markdown(cfg.templates))
+	return scratch.markdown("memo-templates.md", templates.markdown(cfg.templates))
 end
 
 function M.collections(cfg)
-	return open_markdown_scratch("memo-collections.md", collections.list_markdown(cfg))
+	return scratch.markdown("memo-collections.md", collections.list_markdown(cfg))
 end
 
 function M.collection(cfg, name)
@@ -470,17 +451,17 @@ function M.collection(cfg, name)
 		vim.notify("MemoCollection requires a collection name", vim.log.levels.WARN)
 		return nil
 	end
-	return open_markdown_scratch("memo-collection-" .. name .. ".md", collections.markdown(collections.run(name, cfg)))
+	return scratch.markdown("memo-collection-" .. name .. ".md", collections.markdown(collections.run(name, cfg)))
 end
 
 function M.insights(cfg)
 	local loaded = index.load(cfg)
-	return open_markdown_scratch("memo-insights.md", insights.markdown(insights.analyze(loaded.entries)))
+	return scratch.markdown("memo-insights.md", insights.markdown(insights.analyze(loaded.entries)))
 end
 
 function M.recommendations(cfg)
 	local loaded = index.load(cfg)
-	return open_markdown_scratch("memo-recommendations.md", insights.recommendations(insights.analyze(loaded.entries)))
+	return scratch.markdown("memo-recommendations.md", insights.recommendations(insights.analyze(loaded.entries)))
 end
 
 function M.review_pack(cfg, args)
@@ -488,7 +469,7 @@ function M.review_pack(cfg, args)
 	local opts = {
 		query = table.concat(args or {}, " "),
 	}
-	return open_markdown_scratch("memo-review-pack.md", review.pack(loaded.entries, opts))
+	return scratch.markdown("memo-review-pack.md", review.pack(loaded.entries, opts))
 end
 
 function M.worktree_prompt(cfg)
@@ -505,20 +486,20 @@ function M.worktree_prompt(cfg)
 		title = "## Recent Memo Evidence",
 		include_source = true,
 	}))
-	return open_markdown_scratch("memo-worktree-prompt.md", lines)
+	return scratch.markdown("memo-worktree-prompt.md", lines)
 end
 
 function M.duplicates(cfg)
 	local loaded = index.load(cfg)
-	return open_markdown_scratch("memo-duplicates.md", dedupe.markdown(dedupe.find(loaded.entries)))
+	return scratch.markdown("memo-duplicates.md", dedupe.markdown(dedupe.find(loaded.entries)))
 end
 
 function M.validate(cfg)
-	return open_markdown_scratch("memo-config-validation.md", validate.markdown(validate.config(cfg)))
+	return scratch.markdown("memo-config-validation.md", validate.markdown(validate.config(cfg)))
 end
 
 function M.version()
-	return open_markdown_scratch("memo-version.md", version.markdown())
+	return scratch.markdown("memo-version.md", version.markdown())
 end
 
 return M
