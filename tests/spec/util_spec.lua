@@ -124,6 +124,16 @@ describe("is_task_line", function()
 	end)
 end)
 
+describe("extract_tags", function()
+	it("returns hashtag names", function()
+		local tags = util.extract_tags("memo #bug #idea-1 #area_ui")
+
+		assert.equals("bug", tags[1])
+		assert.equals("idea-1", tags[2])
+		assert.equals("area_ui", tags[3])
+	end)
+end)
+
 describe("resolve_memo_path", function()
 	it("returns configured path when per_project is false", function()
 		local path = util.resolve_memo_path("/repo", { per_project = false, path = "/tmp/memo.md" })

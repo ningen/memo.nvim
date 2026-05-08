@@ -99,4 +99,12 @@ function M.is_task_line(line)
 		or line:match("^%s*%- %[[ xX]%]")
 end
 
+function M.extract_tags(line)
+	local tags = {}
+	for tag in line:gmatch("#([%w_-]+)") do
+		table.insert(tags, tag)
+	end
+	return tags
+end
+
 return M

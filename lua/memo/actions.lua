@@ -178,4 +178,41 @@ function M.today(cfg, date)
 	return results
 end
 
+function M.tag_summary(cfg)
+	local memo_path = current_memo_path(cfg)
+	if vim.fn.filereadable(memo_path) == 0 then
+		vim.notify("Memo file does not exist: " .. memo_path, vim.log.levels.WARN)
+		return {}
+	end
+
+	local counts = {}
+	for _, line in ipairs(vim.fn.readfile(memo_path)) do
+		for _, tag in ipairs(util.extract_tags(line)) do
+			counts[tag] = (counts[tag] or 0) + 1
+		end
+	end
+
+	return counts
+end
+
+function M.tags(cfg)
+	local counts = M.tag_summary(cfg)
+	local tags = {}
+	for tag in pairs(counts) do
+		table.insert(tags, tag)
+	end
+	table.sort(tags)
+
+	local lines = { "# Memo Tags", "" }
+	if #tags == 0 then
+		table.insert(lines, "(no tags found)")
+	else
+		for _, tag in ipairs(tags) do
+			table.insert(lines, "- #" .. tag .. " (" .. counts[tag] .. ")")
+		end
+	end
+
+	return open_markdown_scratch("memo-tags.md", lines)
+end
+
 return M

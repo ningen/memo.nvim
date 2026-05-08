@@ -120,6 +120,12 @@ function M.setup(opts)
 	end, {
 		desc = "List today's memo entries in quickfix",
 	})
+
+	vim.api.nvim_create_user_command("MemoTags", function()
+		actions.tags(config)
+	end, {
+		desc = "Open memo tag summary",
+	})
 end
 
 return M

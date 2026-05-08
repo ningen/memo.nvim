@@ -113,3 +113,26 @@ describe("today", function()
 		assert.equals(5, results[2].lnum)
 	end)
 end)
+
+describe("tag_summary", function()
+	local tmpfile
+
+	before_each(function()
+		tmpfile = vim.fn.tempname() .. ".md"
+		vim.fn.writefile({
+			"memo #idea #bug",
+			"another #idea",
+		}, tmpfile)
+	end)
+
+	after_each(function()
+		vim.fn.delete(tmpfile)
+	end)
+
+	it("counts memo tags", function()
+		local counts = actions.tag_summary({ path = tmpfile, per_project = false })
+
+		assert.equals(2, counts.idea)
+		assert.equals(1, counts.bug)
+	end)
+end)
