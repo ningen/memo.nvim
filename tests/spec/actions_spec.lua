@@ -11,6 +11,8 @@ local templates = require("memo.templates")
 local collections = require("memo.collections")
 local insights = require("memo.insights")
 local review = require("memo.review")
+local dedupe = require("memo.dedupe")
+local git_context = require("memo.git_context")
 
 describe("search", function()
 	local tmpfile
@@ -418,5 +420,36 @@ describe("review", function()
 		local text = table.concat(lines, "\n")
 		assert.truthy(text:match("Memo Review Pack"))
 		assert.truthy(text:match("Bug%-tagged entries: 1"))
+	end)
+end)
+
+describe("dedupe", function()
+	it("finds duplicate entries by normalized location and summary", function()
+		local entries = {
+			{ location = { text = "a.lua:1" }, lines = { "memo: same" }, summary = "same" },
+			{ location = { text = "a.lua:1" }, lines = { "memo: same" }, summary = "same" },
+			{ location = { text = "b.lua:1" }, lines = { "memo: different" }, summary = "different" },
+		}
+		local groups = dedupe.find(entries)
+
+		assert.equals(1, #groups)
+		assert.equals(2, #groups[1].entries)
+	end)
+end)
+
+describe("git_context", function()
+	it("formats git snapshot markdown", function()
+		local lines = git_context.markdown({
+			root = "/repo",
+			branch = "main",
+			status = { " M lua/a.lua" },
+			changed_files = { "lua/a.lua" },
+			diff_stat = { " lua/a.lua | 1 +" },
+		})
+		local text = table.concat(lines, "\n")
+
+		assert.truthy(text:match("Git Context"))
+		assert.truthy(text:match("Branch: main"))
+		assert.truthy(text:match("lua/a.lua"))
 	end)
 end)

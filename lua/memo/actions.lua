@@ -14,6 +14,8 @@ local templates = require("memo.templates")
 local collections = require("memo.collections")
 local insights = require("memo.insights")
 local review = require("memo.review")
+local git_context = require("memo.git_context")
+local dedupe = require("memo.dedupe")
 
 local function current_memo_path(cfg)
 	local _, _, git_root = util.get_context()
@@ -485,6 +487,28 @@ function M.review_pack(cfg, args)
 		query = table.concat(args or {}, " "),
 	}
 	return open_markdown_scratch("memo-review-pack.md", review.pack(loaded.entries, opts))
+end
+
+function M.worktree_prompt(cfg)
+	local loaded = index.load(cfg)
+	local lines = {
+		"# Memo Worktree Prompt",
+		"",
+		"Use the memo evidence and git context together. Identify likely intent, risks, missing tests, and next steps.",
+		"",
+	}
+	vim.list_extend(lines, git_context.markdown(git_context.snapshot()))
+	table.insert(lines, "")
+	vim.list_extend(lines, format.entries_markdown(index.filter(loaded.entries, { limit = 20 }), {
+		title = "## Recent Memo Evidence",
+		include_source = true,
+	}))
+	return open_markdown_scratch("memo-worktree-prompt.md", lines)
+end
+
+function M.duplicates(cfg)
+	local loaded = index.load(cfg)
+	return open_markdown_scratch("memo-duplicates.md", dedupe.markdown(dedupe.find(loaded.entries)))
 end
 
 return M

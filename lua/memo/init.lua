@@ -278,6 +278,18 @@ function M.setup(opts)
 		nargs = "*",
 		desc = "Open review pack from memo evidence",
 	})
+
+	vim.api.nvim_create_user_command("MemoWorktreePrompt", function()
+		actions.worktree_prompt(config)
+	end, {
+		desc = "Open memo plus git worktree prompt",
+	})
+
+	vim.api.nvim_create_user_command("MemoDuplicates", function()
+		actions.duplicates(config)
+	end, {
+		desc = "Open duplicate memo candidate report",
+	})
 end
 
 return M
