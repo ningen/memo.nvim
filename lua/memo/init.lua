@@ -54,6 +54,20 @@ function M.setup(opts)
 		desc = "Toggle memo window",
 	})
 
+	vim.api.nvim_create_user_command("MemoProject", function()
+		local project_config = vim.tbl_deep_extend("force", config, { per_project = true })
+		window.toggle(nil, nil, project_config, nil)
+	end, {
+		desc = "Toggle project memo window",
+	})
+
+	vim.api.nvim_create_user_command("MemoGlobal", function()
+		local global_config = vim.tbl_deep_extend("force", config, { per_project = false })
+		window.toggle(nil, nil, global_config, nil)
+	end, {
+		desc = "Toggle global memo window",
+	})
+
 	vim.api.nvim_create_user_command("MemoHere", function(cmd_opts)
 		local line1 = cmd_opts.line1
 		local line2 = cmd_opts.line2
