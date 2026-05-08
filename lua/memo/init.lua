@@ -2,6 +2,7 @@ local M = {}
 
 local window = require("memo.window")
 local actions = require("memo.actions")
+local telescope = require("memo.telescope")
 
 local config = {}
 
@@ -99,6 +100,12 @@ function M.setup(opts)
 	end, {
 		nargs = "+",
 		desc = "Search memo and show matches in quickfix",
+	})
+
+	vim.api.nvim_create_user_command("MemoTelescope", function()
+		telescope.entries(config)
+	end, {
+		desc = "Browse memo entries with Telescope",
 	})
 
 	vim.api.nvim_create_user_command("MemoExport", function()

@@ -1,4 +1,5 @@
 local util = require("memo.util")
+local parser = require("memo.parser")
 
 describe("make_header", function()
 	it("returns 4 lines", function()
@@ -157,6 +158,47 @@ describe("prune_blank_lines", function()
 		assert.equals("", lines[2])
 		assert.equals("", lines[3])
 		assert.equals("b", lines[4])
+	end)
+end)
+
+describe("parser", function()
+	it("parses memo entries with metadata", function()
+		local entries = parser.parse_entries({
+			"",
+			"---",
+			"## 2026-05-09 12:30 | memo.nvim | lua/memo/init.lua:10-12",
+			"",
+			"memo: remember this #idea",
+			"",
+			"```lua",
+			"local x = 1",
+			"```",
+			"",
+		})
+
+		assert.equals(1, #entries)
+		assert.equals("2026-05-09", entries[1].date)
+		assert.equals("12:30", entries[1].time)
+		assert.equals("memo.nvim", entries[1].project)
+		assert.equals("lua/memo/init.lua", entries[1].location.path)
+		assert.equals(10, entries[1].location.line1)
+		assert.equals(12, entries[1].location.line2)
+		assert.equals("remember this #idea", entries[1].note.text)
+		assert.equals("idea", entries[1].tags[1])
+		assert.equals("lua", entries[1].code_blocks[1].language)
+	end)
+
+	it("filters entries by tag, date, and text", function()
+		local entries = parser.parse_entries({
+			"## 2026-05-09 10:00 | p | a.lua",
+			"memo: alpha #one",
+			"## 2026-05-10 10:00 | p | b.lua",
+			"memo: beta #two",
+		})
+
+		assert.equals(1, #parser.find_by_tag(entries, "one"))
+		assert.equals(1, #parser.find_by_date(entries, "2026-05-10"))
+		assert.equals(1, #parser.find_by_text(entries, "beta"))
 	end)
 end)
 
