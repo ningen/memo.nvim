@@ -57,3 +57,31 @@ describe("export_lines", function()
 		assert.truthy(text:match("memo: keep this"))
 	end)
 end)
+
+describe("todo", function()
+	local tmpfile
+
+	before_each(function()
+		tmpfile = vim.fn.tempname() .. ".md"
+		vim.fn.writefile({
+			"plain",
+			"TODO: one",
+			"- [ ] two",
+			"FIXME three",
+		}, tmpfile)
+	end)
+
+	after_each(function()
+		vim.fn.delete(tmpfile)
+		vim.fn.setqflist({}, "r")
+	end)
+
+	it("lists task-like memo lines", function()
+		local results = actions.todo({ path = tmpfile, per_project = false })
+
+		assert.equals(3, #results)
+		assert.equals(2, results[1].lnum)
+		assert.equals(3, results[2].lnum)
+		assert.equals(4, results[3].lnum)
+	end)
+end)

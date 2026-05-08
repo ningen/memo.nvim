@@ -94,6 +94,12 @@ function M.setup(opts)
 	end, {
 		desc = "Yank the last memo entry",
 	})
+
+	vim.api.nvim_create_user_command("MemoTodo", function()
+		actions.todo(config)
+	end, {
+		desc = "List memo TODO items in quickfix",
+	})
 end
 
 return M

@@ -93,4 +93,10 @@ function M.extract_last_entry(lines)
 	return entry
 end
 
+function M.is_task_line(line)
+	return line:match("%f[%w]TODO%f[%W]")
+		or line:match("%f[%w]FIXME%f[%W]")
+		or line:match("^%s*%- %[[ xX]%]")
+end
+
 return M
