@@ -13,6 +13,7 @@ local insights = require("memo.insights")
 local review = require("memo.review")
 local dedupe = require("memo.dedupe")
 local git_context = require("memo.git_context")
+local completion = require("memo.completion")
 
 describe("search", function()
 	local tmpfile
@@ -451,5 +452,29 @@ describe("git_context", function()
 		assert.truthy(text:match("Git Context"))
 		assert.truthy(text:match("Branch: main"))
 		assert.truthy(text:match("lua/a.lua"))
+	end)
+end)
+
+describe("completion", function()
+	it("completes collection names from defaults and config", function()
+		local names = completion.collection_names({
+			collections = {
+				custom = { query = "tag:custom" },
+			},
+		}, "c")
+
+		assert.equals("custom", names[1])
+	end)
+
+	it("completes prompt kind arguments", function()
+		local args = completion.prompt_args(nil, "MemoPrompt --kind=d")
+
+		assert.equals("--kind=debug", args[1])
+	end)
+
+	it("completes query prefixes", function()
+		local args = completion.query_args(nil, "MemoQuery ta")
+
+		assert.equals("tag:", args[1])
 	end)
 end)

@@ -3,6 +3,7 @@ local M = {}
 local window = require("memo.window")
 local actions = require("memo.actions")
 local telescope = require("memo.telescope")
+local completion = require("memo.completion")
 
 local config = {}
 
@@ -188,6 +189,7 @@ function M.setup(opts)
 		actions.prompt(config, cmd_opts.fargs)
 	end, {
 		nargs = "*",
+		complete = completion.prompt_args,
 		desc = "Open an LLM prompt built from memo entries",
 	})
 
@@ -220,6 +222,7 @@ function M.setup(opts)
 		actions.query(config, cmd_opts.fargs)
 	end, {
 		nargs = "*",
+		complete = completion.query_args,
 		desc = "Query indexed memo entries",
 	})
 
@@ -257,6 +260,9 @@ function M.setup(opts)
 		actions.collection(config, cmd_opts.args)
 	end, {
 		nargs = 1,
+		complete = function(arg_lead)
+			return completion.collection_names(config, arg_lead)
+		end,
 		desc = "Open a named memo collection",
 	})
 
