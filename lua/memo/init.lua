@@ -1,6 +1,7 @@
 local M = {}
 
 local window = require("memo.window")
+local actions = require("memo.actions")
 
 local config = {}
 
@@ -73,6 +74,13 @@ function M.setup(opts)
 	end, {
 		range = true,
 		desc = "Capture quick memo at current location",
+	})
+
+	vim.api.nvim_create_user_command("MemoSearch", function(cmd_opts)
+		actions.search(cmd_opts.args, config)
+	end, {
+		nargs = "+",
+		desc = "Search memo and show matches in quickfix",
 	})
 end
 
