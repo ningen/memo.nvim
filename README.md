@@ -54,6 +54,16 @@ require("memo").setup({
 | `:'<,'>Memo` | ビジュアル選択範囲をコードブロックとしてメモに追記する |
 | `:MemoHere` | 現在行にクイックメモを付けて追記する |
 | `:'<,'>MemoHere` | 選択範囲にクイックメモを付けて追記する |
+| `:MemoSearch {query}` | メモを検索して quickfix に表示する |
+| `:MemoExport` | LLM に渡しやすい Markdown バッファを開く |
+| `:MemoYankLast` | 直近のメモエントリを yank する |
+| `:MemoTodo` | TODO / FIXME / checkbox を quickfix に表示する |
+| `:MemoToday` | 今日のメモエントリを quickfix に表示する |
+| `:MemoProject` | プロジェクトメモを開閉する |
+| `:MemoGlobal` | グローバルメモを開閉する |
+| `:MemoTags` | タグ一覧を Markdown バッファで開く |
+| `:MemoStats` | メモ統計を Markdown バッファで開く |
+| `:MemoPruneBlank` | 余分な連続空行を整理する |
 
 ### ビジュアル選択 → コードブロック
 
