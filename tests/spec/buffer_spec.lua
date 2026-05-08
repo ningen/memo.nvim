@@ -13,11 +13,13 @@ describe("append_lines", function()
 	end)
 
 	it("appends lines to empty buffer and returns last line number", function()
+		-- nvim_create_buf starts with 1 empty line (line_count = 1)
 		local last = buffer.append_lines(buf, { "line1", "line2" })
 		local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
-		assert.equals(2, last)
-		assert.equals("line1", lines[1])
-		assert.equals("line2", lines[2])
+		assert.equals(3, last)
+		assert.equals("", lines[1])
+		assert.equals("line1", lines[2])
+		assert.equals("line2", lines[3])
 	end)
 
 	it("appends after existing content", function()
@@ -30,8 +32,9 @@ describe("append_lines", function()
 	end)
 
 	it("handles empty lines table", function()
+		-- buffer starts with 1 empty line, so last = 1 + 0 = 1
 		local last = buffer.append_lines(buf, {})
-		assert.equals(0, last)
+		assert.equals(1, last)
 	end)
 end)
 
