@@ -21,7 +21,7 @@ function M.close()
 	win = nil
 end
 
-function M.open(range_lines, filetype, cfg)
+function M.open(range_lines, filetype, cfg, range)
 	local filename, project, git_root = util.get_context()
 	local memo_path = util.resolve_memo_path(git_root, cfg)
 	local b = buffer.get_or_create(memo_path)
@@ -48,7 +48,12 @@ function M.open(range_lines, filetype, cfg)
 
 	vim.wo[win].winblend = 20
 
-	local header = util.make_header(filename, project)
+	local location = nil
+	if range then
+		location = util.make_location(range.filepath, git_root, range.line1, range.line2)
+	end
+
+	local header = util.make_header(location or filename, project)
 	local cursor_line = buffer.append_lines(b, header)
 
 	if range_lines and #range_lines > 0 then
@@ -63,11 +68,11 @@ function M.open(range_lines, filetype, cfg)
 	end, { buffer = b, desc = "Close memo" })
 end
 
-function M.toggle(range_lines, filetype, cfg)
+function M.toggle(range_lines, filetype, cfg, range)
 	if M.is_open() then
 		M.close()
 	else
-		M.open(range_lines, filetype, cfg)
+		M.open(range_lines, filetype, cfg, range)
 	end
 end
 

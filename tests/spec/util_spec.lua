@@ -25,6 +25,23 @@ describe("make_header", function()
 	end)
 end)
 
+describe("make_location", function()
+	it("uses a path relative to git root with selected line range", function()
+		local location = util.make_location("/repo/lua/memo/init.lua", "/repo", 12, 20)
+		assert.equals("lua/memo/init.lua:12-20", location)
+	end)
+
+	it("uses a single line suffix when start and end are the same", function()
+		local location = util.make_location("/repo/lua/memo/init.lua", "/repo", 12, 12)
+		assert.equals("lua/memo/init.lua:12", location)
+	end)
+
+	it("keeps the full path outside git root", function()
+		local location = util.make_location("/tmp/scratch.lua", "/repo", 1, 2)
+		assert.equals("/tmp/scratch.lua:1-2", location)
+	end)
+end)
+
 describe("make_code_block", function()
 	it("wraps lines in fenced code block with filetype", function()
 		local block = util.make_code_block({ "local x = 1" }, "lua")

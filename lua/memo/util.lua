@@ -31,6 +31,23 @@ function M.make_header(filename, project)
 	}
 end
 
+function M.make_location(filepath, git_root, line1, line2)
+	local path = filepath ~= "" and filepath or "（no file）"
+
+	if git_root and filepath:sub(1, #git_root + 1) == git_root .. "/" then
+		path = filepath:sub(#git_root + 2)
+	end
+
+	if line1 and line2 then
+		if line1 == line2 then
+			return path .. ":" .. line1
+		end
+		return path .. ":" .. line1 .. "-" .. line2
+	end
+
+	return path
+end
+
 function M.make_code_block(lines, filetype)
 	local block = { "```" .. (filetype or "") }
 	vim.list_extend(block, lines)
