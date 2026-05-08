@@ -85,3 +85,31 @@ describe("todo", function()
 		assert.equals(4, results[3].lnum)
 	end)
 end)
+
+describe("today", function()
+	local tmpfile
+
+	before_each(function()
+		tmpfile = vim.fn.tempname() .. ".md"
+		vim.fn.writefile({
+			"## 2026-05-09 10:00 | project | a.lua",
+			"memo",
+			"## 2026-05-08 10:00 | project | b.lua",
+			"memo",
+			"## 2026-05-09 11:00 | project | c.lua",
+		}, tmpfile)
+	end)
+
+	after_each(function()
+		vim.fn.delete(tmpfile)
+		vim.fn.setqflist({}, "r")
+	end)
+
+	it("lists entries for the requested date", function()
+		local results = actions.today({ path = tmpfile, per_project = false }, "2026-05-09")
+
+		assert.equals(2, #results)
+		assert.equals(1, results[1].lnum)
+		assert.equals(5, results[2].lnum)
+	end)
+end)

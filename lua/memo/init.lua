@@ -100,6 +100,12 @@ function M.setup(opts)
 	end, {
 		desc = "List memo TODO items in quickfix",
 	})
+
+	vim.api.nvim_create_user_command("MemoToday", function()
+		actions.today(config)
+	end, {
+		desc = "List today's memo entries in quickfix",
+	})
 end
 
 return M

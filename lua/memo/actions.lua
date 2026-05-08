@@ -144,4 +144,38 @@ function M.todo(cfg)
 	return results
 end
 
+function M.today(cfg, date)
+	local memo_path = current_memo_path(cfg)
+	if vim.fn.filereadable(memo_path) == 0 then
+		vim.notify("Memo file does not exist: " .. memo_path, vim.log.levels.WARN)
+		return {}
+	end
+
+	date = date or os.date("%Y-%m-%d")
+	local results = {}
+	for lnum, line in ipairs(vim.fn.readfile(memo_path)) do
+		if line:match("^## " .. vim.pesc(date)) then
+			table.insert(results, {
+				filename = memo_path,
+				lnum = lnum,
+				col = 1,
+				text = line,
+			})
+		end
+	end
+
+	vim.fn.setqflist({}, " ", {
+		title = "MemoToday: " .. date,
+		items = results,
+	})
+
+	if #results > 0 then
+		vim.cmd("copen")
+	else
+		vim.notify("No memo entries for: " .. date, vim.log.levels.INFO)
+	end
+
+	return results
+end
+
 return M
