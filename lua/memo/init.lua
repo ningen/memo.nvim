@@ -302,6 +302,12 @@ function M.setup(opts)
 	end, {
 		desc = "Open memo configuration validation report",
 	})
+
+	vim.api.nvim_create_user_command("MemoVersion", function()
+		actions.version()
+	end, {
+		desc = "Open memo.nvim version report",
+	})
 end
 
 return M

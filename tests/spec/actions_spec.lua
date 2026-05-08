@@ -15,6 +15,7 @@ local dedupe = require("memo.dedupe")
 local git_context = require("memo.git_context")
 local completion = require("memo.completion")
 local validate = require("memo.validate")
+local version = require("memo.version")
 
 describe("search", function()
 	local tmpfile
@@ -504,5 +505,14 @@ describe("validate", function()
 
 		local text = table.concat(validate.markdown(report), "\n")
 		assert.truthy(text:match("collections.bad.query"))
+	end)
+end)
+
+describe("version", function()
+	it("returns plugin version metadata", function()
+		local info = version.info()
+
+		assert.equals("memo.nvim", info.name)
+		assert.truthy(info.version:match("%d+%.%d+%.%d+"))
 	end)
 end)

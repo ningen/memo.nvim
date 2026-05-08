@@ -17,6 +17,7 @@ local review = require("memo.review")
 local git_context = require("memo.git_context")
 local dedupe = require("memo.dedupe")
 local validate = require("memo.validate")
+local version = require("memo.version")
 
 local function current_memo_path(cfg)
 	local _, _, git_root = util.get_context()
@@ -514,6 +515,10 @@ end
 
 function M.validate(cfg)
 	return open_markdown_scratch("memo-config-validation.md", validate.markdown(validate.config(cfg)))
+end
+
+function M.version()
+	return open_markdown_scratch("memo-version.md", version.markdown())
 end
 
 return M
