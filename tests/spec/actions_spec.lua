@@ -16,6 +16,7 @@ local git_context = require("memo.git_context")
 local completion = require("memo.completion")
 local validate = require("memo.validate")
 local version = require("memo.version")
+local config = require("memo.config")
 
 describe("search", function()
 	local tmpfile
@@ -514,5 +515,28 @@ describe("version", function()
 
 		assert.equals("memo.nvim", info.name)
 		assert.truthy(info.version:match("%d+%.%d+%.%d+"))
+	end)
+end)
+
+describe("config", function()
+	it("builds defaults with expanded path", function()
+		local cfg = config.build({})
+
+		assert.equals(vim.fn.expand("~/memo.md"), cfg.path)
+		assert.equals(false, cfg.per_project)
+		assert.equals(0.6, cfg.window.width)
+	end)
+
+	it("merges user settings into defaults", function()
+		local cfg = config.build({
+			path = "~/custom-memo.md",
+			window = {
+				width = 0.8,
+			},
+		})
+
+		assert.equals(vim.fn.expand("~/custom-memo.md"), cfg.path)
+		assert.equals(0.8, cfg.window.width)
+		assert.equals(0.4, cfg.window.height)
 	end)
 end)
