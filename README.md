@@ -65,6 +65,8 @@ require("memo").setup({
 | `:MemoStats` | メモ統計を Markdown バッファで開く |
 | `:MemoPruneBlank` | 余分な連続空行を整理する |
 | `:MemoTelescope` | Telescope でメモエントリを検索・プレビューする |
+| `:MemoSnacks` | folke/snacks.nvim picker でメモエントリを検索・プレビューする |
+| `:MemoPicker` | Snacks があれば Snacks、なければ Telescope で開く |
 | `:MemoIndex` | 構造化されたメモ概要を開く |
 | `:MemoTimeline` | 日付別タイムラインを開く |
 | `:MemoExportFiltered` | 条件付きで LLM 向けメモを書き出す |

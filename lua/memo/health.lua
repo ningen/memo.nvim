@@ -53,6 +53,17 @@ function M.check(cfg)
 		table.insert(report, warn("Telescope is not available; use quickfix commands instead"))
 	end
 
+	local has_snacks = (_G.Snacks and _G.Snacks.picker) ~= nil
+	if not has_snacks then
+		local ok_snacks, snacks = pcall(require, "snacks")
+		has_snacks = ok_snacks and snacks and snacks.picker
+	end
+	if has_snacks then
+		table.insert(report, ok("Snacks picker is available"))
+	else
+		table.insert(report, warn("Snacks picker is not available; MemoPicker will fall back to Telescope"))
+	end
+
 	return report
 end
 

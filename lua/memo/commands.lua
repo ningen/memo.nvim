@@ -2,6 +2,8 @@ local M = {}
 
 local actions = require("memo.actions")
 local completion = require("memo.completion")
+local picker = require("memo.picker")
+local snacks = require("memo.snacks")
 local telescope = require("memo.telescope")
 local window = require("memo.window")
 
@@ -77,6 +79,14 @@ function M.register(config)
 	register("MemoTelescope", function()
 		telescope.entries(config)
 	end, { desc = "Browse memo entries with Telescope" })
+
+	register("MemoSnacks", function()
+		snacks.entries(config)
+	end, { desc = "Browse memo entries with Snacks picker" })
+
+	register("MemoPicker", function()
+		picker.entries(config)
+	end, { desc = "Browse memo entries with Snacks or Telescope" })
 
 	register("MemoExport", function()
 		actions.export(config)

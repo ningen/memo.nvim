@@ -7,6 +7,7 @@
 | `MemoSearch` | Literal lookup into the active memo file. | Use `/` after opening `:Memo`. |
 | `MemoQuery` | Combine text, tags, dates, projects, paths, and limits. | Use repeated `MemoSearch` calls. |
 | `MemoTelescope` | Interactive entry picker with preview. | Use quickfix commands when Telescope is not installed. |
+| `MemoSnacks` / `MemoPicker` | Snacks-first picker browsing with Telescope fallback. | Use `MemoTelescope` directly or quickfix commands. |
 | `MemoIndex` | Overview of files, tags, and recent entries. | Use `MemoStats` for only counts. |
 | `MemoTimeline` | Date-grouped work history. | Search date strings manually. |
 
