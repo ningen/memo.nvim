@@ -2,6 +2,7 @@ local M = {}
 
 local parser = require("memo.parser")
 local util = require("memo.util")
+local window = require("memo.window")
 
 local function snacks()
 	if _G.Snacks and _G.Snacks.picker then
@@ -27,9 +28,10 @@ local function notify_missing()
 	vim.notify("memo.nvim snacks integration requires folke/snacks.nvim with picker enabled", vim.log.levels.WARN)
 end
 
-local function open_memo_entry(memo_file, entry)
-	vim.cmd("edit " .. vim.fn.fnameescape(memo_file))
-	vim.api.nvim_win_set_cursor(0, { entry.header_lnum or entry.start_lnum or 1, 0 })
+local function open_memo_entry(memo_file, entry, cfg)
+	window.open_path(memo_file, cfg, {
+		lnum = entry.header_lnum or entry.start_lnum or 1,
+	})
 end
 
 local function make_item(memo_file, entry)
@@ -46,7 +48,7 @@ local function make_item(memo_file, entry)
 	}
 end
 
-local function entry_picker(title, memo_file, entries)
+local function entry_picker(title, memo_file, entries, cfg)
 	local Snacks = snacks()
 	if not Snacks then
 		notify_missing()
@@ -70,7 +72,7 @@ local function entry_picker(title, memo_file, entries)
 		confirm = function(picker, item)
 			picker:close()
 			if item and item.entry then
-				open_memo_entry(memo_file, item.entry)
+				open_memo_entry(memo_file, item.entry, cfg)
 			end
 		end,
 	})
@@ -80,7 +82,7 @@ function M.entries(cfg, opts)
 	opts = opts or {}
 	local path = opts.path or memo_path(cfg)
 	local entries = parser.parse_file(path)
-	return entry_picker(opts.title or "Memo Entries", path, entries)
+	return entry_picker(opts.title or "Memo Entries", path, entries, cfg)
 end
 
 function M.search(cfg, query)
@@ -89,7 +91,7 @@ function M.search(cfg, query)
 	if query and query ~= "" then
 		entries = parser.find_by_text(entries, query)
 	end
-	return entry_picker("Memo Search", path, entries)
+	return entry_picker("Memo Search", path, entries, cfg)
 end
 
 function M.tags(cfg)
@@ -137,7 +139,7 @@ function M.tags(cfg)
 		confirm = function(picker, item)
 			picker:close()
 			if item then
-				entry_picker("Memo #" .. item.tag, path, item.entries)
+				entry_picker("Memo #" .. item.tag, path, item.entries, cfg)
 			end
 		end,
 	})

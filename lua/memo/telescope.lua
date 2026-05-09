@@ -2,6 +2,7 @@ local M = {}
 
 local parser = require("memo.parser")
 local util = require("memo.util")
+local window = require("memo.window")
 
 local function has_telescope()
 	local ok = pcall(require, "telescope")
@@ -32,7 +33,7 @@ local function make_entry(memo_file, entry)
 	}
 end
 
-local function picker(title, memo_file, entries)
+local function picker(title, memo_file, entries, cfg)
 	if not has_telescope() then
 		notify_missing()
 		return nil
@@ -68,8 +69,9 @@ local function picker(title, memo_file, entries)
 					local selected = action_state.get_selected_entry()
 					actions.close(prompt_bufnr)
 					if selected then
-						vim.cmd("edit " .. vim.fn.fnameescape(memo_file))
-						vim.api.nvim_win_set_cursor(0, { selected.value.header_lnum, 0 })
+						window.open_path(memo_file, cfg, {
+							lnum = selected.value.header_lnum or selected.value.start_lnum or 1,
+						})
 					end
 				end)
 				return true
@@ -82,7 +84,7 @@ function M.entries(cfg, opts)
 	opts = opts or {}
 	local path = opts.path or memo_path(cfg)
 	local entries = parser.parse_file(path)
-	return picker(opts.title or "Memo Entries", path, entries)
+	return picker(opts.title or "Memo Entries", path, entries, cfg)
 end
 
 function M.search(cfg, query)
@@ -91,7 +93,7 @@ function M.search(cfg, query)
 	if query and query ~= "" then
 		entries = parser.find_by_text(entries, query)
 	end
-	return picker("Memo Search", path, entries)
+	return picker("Memo Search", path, entries, cfg)
 end
 
 function M.tags(cfg)
@@ -151,7 +153,7 @@ function M.tags(cfg)
 					local selected = action_state.get_selected_entry()
 					actions.close(prompt_bufnr)
 					if selected then
-						picker("Memo #" .. selected.value.tag, path, selected.value.entries)
+						picker("Memo #" .. selected.value.tag, path, selected.value.entries, cfg)
 					end
 				end)
 				return true

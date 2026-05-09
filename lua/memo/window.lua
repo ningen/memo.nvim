@@ -86,6 +86,47 @@ function M.open(range_lines, filetype, cfg, range)
 	end, { buffer = b, desc = "Close memo" })
 end
 
+function M.open_path(memo_path, cfg, opts)
+	opts = opts or {}
+	local b = buffer.get_or_create(memo_path)
+	local style = cfg.window or {}
+
+	local width = resolve_size(style.width or 0.6, vim.o.columns)
+	local height = resolve_size(style.height or 0.4, vim.o.lines)
+	local row = math.floor((vim.o.lines - height) / 2)
+	local col = math.floor((vim.o.columns - width) / 2)
+	local title = style.title or (" 📝 " .. vim.fn.fnamemodify(memo_path, ":t") .. " ")
+
+	if M.is_open() then
+		vim.api.nvim_win_close(win, true)
+		win = nil
+	end
+
+	win = vim.api.nvim_open_win(b, true, {
+		relative = "editor",
+		row = row,
+		col = col,
+		width = width,
+		height = height,
+		title = title,
+		title_pos = style.title_pos or "center",
+		border = style.border or "rounded",
+	})
+
+	apply_window_style(win, style)
+
+	if opts.lnum then
+		local line_count = vim.api.nvim_buf_line_count(b)
+		vim.api.nvim_win_set_cursor(win, { math.min(opts.lnum, line_count), 0 })
+	end
+
+	vim.keymap.set("n", "q", function()
+		M.close()
+	end, { buffer = b, desc = "Close memo" })
+
+	return win
+end
+
 function M.toggle(range_lines, filetype, cfg, range)
 	if M.is_open() then
 		M.close()
